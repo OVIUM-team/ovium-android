@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Solo en pruebas (debug): permite hablar con la API local por HTTP.
+         En la nube se usa HTTPS, así que esto no va en la versión final. -->
+    <application android:usesCleartextTraffic="true" />
+</manifest>
