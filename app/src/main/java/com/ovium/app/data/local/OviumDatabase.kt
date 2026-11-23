@@ -88,6 +88,9 @@ data class PesajeEntity(
 
 @Dao
 interface OviumLocalDao {
+    @Query("SELECT * FROM animal ORDER BY rancho_id, id")
+    fun observarAnimales(): Flow<List<AnimalEntity>>
+
     @Upsert
     suspend fun guardarAnimal(animal: AnimalEntity)
 
