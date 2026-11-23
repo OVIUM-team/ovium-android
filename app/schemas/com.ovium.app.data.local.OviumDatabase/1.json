@@ -1,0 +1,299 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "9f6463206854923c76522e7a6bee0e8a",
+    "entities": [
+      {
+        "tableName": "animal",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `rancho_id` TEXT NOT NULL, `sexo` TEXT NOT NULL, `estado` TEXT NOT NULL, `madre_id` TEXT, `padre_id` TEXT, `raza_id` TEXT, `fecha_nacimiento` TEXT, `etapa_vida` TEXT, `estado_reproductivo` TEXT, `criador` TEXT, `propietario` TEXT, `circunferencia_testicular_cent` INTEGER, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ranchoId",
+            "columnName": "rancho_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sexo",
+            "columnName": "sexo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "estado",
+            "columnName": "estado",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "madreId",
+            "columnName": "madre_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "padreId",
+            "columnName": "padre_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "razaId",
+            "columnName": "raza_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "fechaNacimiento",
+            "columnName": "fecha_nacimiento",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "etapaVida",
+            "columnName": "etapa_vida",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "estadoReproductivo",
+            "columnName": "estado_reproductivo",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "criador",
+            "columnName": "criador",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "propietario",
+            "columnName": "propietario",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "circunferenciaTesticularCent",
+            "columnName": "circunferencia_testicular_cent",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_animal_rancho_id",
+            "unique": false,
+            "columnNames": [
+              "rancho_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_animal_rancho_id` ON `${TABLE_NAME}` (`rancho_id`)"
+          }
+        ]
+      },
+      {
+        "tableName": "parto",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `madre_id` TEXT NOT NULL, `fecha` TEXT NOT NULL, `tipo_parto_id` TEXT NOT NULL, `metodo_concepcion_id` TEXT NOT NULL, `registrado_por` TEXT NOT NULL, `fecha_captura` TEXT NOT NULL, `cierre_edicion` TEXT NOT NULL, `padre_id` TEXT, `bloqueado` INTEGER NOT NULL, `observaciones` TEXT, PRIMARY KEY(`id`), FOREIGN KEY(`madre_id`) REFERENCES `animal`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION , FOREIGN KEY(`padre_id`) REFERENCES `animal`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "madreId",
+            "columnName": "madre_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fecha",
+            "columnName": "fecha",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tipoPartoId",
+            "columnName": "tipo_parto_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "metodoConcepcionId",
+            "columnName": "metodo_concepcion_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "registradoPor",
+            "columnName": "registrado_por",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fechaCaptura",
+            "columnName": "fecha_captura",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cierreEdicion",
+            "columnName": "cierre_edicion",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "padreId",
+            "columnName": "padre_id",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "bloqueado",
+            "columnName": "bloqueado",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "observaciones",
+            "columnName": "observaciones",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_parto_madre_id_fecha",
+            "unique": false,
+            "columnNames": [
+              "madre_id",
+              "fecha"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_parto_madre_id_fecha` ON `${TABLE_NAME}` (`madre_id`, `fecha`)"
+          },
+          {
+            "name": "index_parto_padre_id",
+            "unique": false,
+            "columnNames": [
+              "padre_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_parto_padre_id` ON `${TABLE_NAME}` (`padre_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "animal",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "madre_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          },
+          {
+            "table": "animal",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "padre_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "pesaje",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `animal_id` TEXT NOT NULL, `fecha` TEXT NOT NULL, `tipo_pesaje_id` TEXT NOT NULL, `peso_cent` INTEGER NOT NULL, `registrado_por` TEXT NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`animal_id`) REFERENCES `animal`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "animalId",
+            "columnName": "animal_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fecha",
+            "columnName": "fecha",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tipoPesajeId",
+            "columnName": "tipo_pesaje_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pesoCent",
+            "columnName": "peso_cent",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "registradoPor",
+            "columnName": "registrado_por",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_pesaje_animal_id_fecha",
+            "unique": false,
+            "columnNames": [
+              "animal_id",
+              "fecha"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_pesaje_animal_id_fecha` ON `${TABLE_NAME}` (`animal_id`, `fecha`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "animal",
+            "onDelete": "NO ACTION",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "animal_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '9f6463206854923c76522e7a6bee0e8a')"
+    ]
+  }
+}
