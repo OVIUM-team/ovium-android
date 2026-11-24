@@ -1,4 +1,4 @@
-﻿package com.ovium.app.data.local
+package com.ovium.app.data.local
 
 import androidx.room.Room
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -51,6 +51,9 @@ class OviumDatabaseTest {
             assertEquals(animal, dao.observarAnimal(animal.id).first())
             assertEquals(listOf(parto), dao.observarPartos(animal.id).first())
             assertEquals(listOf(pesaje), dao.observarPesajes(animal.id).first())
+            assertEquals("pendiente", dao.observarAnimal(animal.id).first()?.estadoSincronizacion)
+            assertEquals("pendiente", dao.observarPartos(animal.id).first().single().estadoSincronizacion)
+            assertEquals("pendiente", dao.observarPesajes(animal.id).first().single().estadoSincronizacion)
         } finally {
             base.close()
         }
