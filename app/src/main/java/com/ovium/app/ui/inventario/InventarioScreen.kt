@@ -159,7 +159,12 @@ fun FichaAnimalScreen(animalId: String, onVolver: () -> Unit) {
 
     val animalSeleccionado = animal
     if (mostrarRegistro && animalSeleccionado != null) {
-        RegistroPesajeDialog(animalSeleccionado, onCerrar = { mostrarRegistro = false })
+        RegistroPesajeDialog(
+            animalSeleccionado,
+            historial = pesajes.orEmpty(),
+            guardarLocal = dao::guardarPesaje,
+            onCerrar = { mostrarRegistro = false }
+        )
     }
 
     LazyColumn(
@@ -194,7 +199,7 @@ fun FichaAnimalScreen(animalId: String, onVolver: () -> Unit) {
 
             item {
                 Text("Pesajes", style = MaterialTheme.typography.titleMedium)
-                Button(onClick = { mostrarRegistro = true }) { Text("Registrar pesaje") }
+                Button(enabled = pesajes != null, onClick = { mostrarRegistro = true }) { Text("Registrar pesaje") }
             }
             val historialPesajes = pesajes
             when {
@@ -202,7 +207,10 @@ fun FichaAnimalScreen(animalId: String, onVolver: () -> Unit) {
                 historialPesajes.isEmpty() -> item { Text("Sin pesajes registrados.") }
                 else -> items(historialPesajes, key = { "pesaje-${it.id}" }) { pesaje ->
                     val peso = BigDecimal.valueOf(pesaje.pesoCent, 2).toPlainString()
-                    Text("${pesaje.fecha} · $peso kg")
+                    Column {
+                        Text("${pesaje.fecha} · $peso kg")
+                        Text(resumenPesaje(ficha, pesaje, historialPesajes))
+                    }
                 }
             }
 
@@ -252,7 +260,7 @@ private suspend fun cargarDemo(base: OviumDatabase) = base.withTransaction {
             id = "demo-pesaje-001",
             animalId = animalId,
             fecha = "2026-11-23",
-            tipoPesajeId = "demo-evaluacion",
+            tipo = "evaluacion",
             pesoCent = 3250L,
             registradoPor = "demo"
         )

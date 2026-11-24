@@ -81,7 +81,7 @@ data class PesajeEntity(
     @PrimaryKey val id: String,
     @ColumnInfo(name = "animal_id") val animalId: String,
     val fecha: String,
-    @ColumnInfo(name = "tipo_pesaje_id") val tipoPesajeId: String,
+    val tipo: String,
     @ColumnInfo(name = "peso_cent") val pesoCent: Long,
     @ColumnInfo(name = "registrado_por") val registradoPor: String,
     @ColumnInfo(name = "estado_sincronizacion", defaultValue = "'pendiente'")
