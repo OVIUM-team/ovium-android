@@ -29,7 +29,9 @@ data class AnimalEntity(
     @ColumnInfo(name = "estado_reproductivo") val estadoReproductivo: String? = null,
     val criador: String? = null,
     val propietario: String? = null,
-    @ColumnInfo(name = "circunferencia_testicular_cent") val circunferenciaTesticularCent: Long? = null
+    @ColumnInfo(name = "circunferencia_testicular_cent") val circunferenciaTesticularCent: Long? = null,
+    @ColumnInfo(name = "estado_sincronizacion", defaultValue = "'pendiente'")
+    val estadoSincronizacion: String = "pendiente"
 )
 
 @Entity(
@@ -59,7 +61,9 @@ data class PartoEntity(
     @ColumnInfo(name = "cierre_edicion") val cierreEdicion: String,
     @ColumnInfo(name = "padre_id") val padreId: String? = null,
     val bloqueado: Boolean = false,
-    val observaciones: String? = null
+    val observaciones: String? = null,
+    @ColumnInfo(name = "estado_sincronizacion", defaultValue = "'pendiente'")
+    val estadoSincronizacion: String = "pendiente"
 )
 
 @Entity(
@@ -79,7 +83,9 @@ data class PesajeEntity(
     val fecha: String,
     @ColumnInfo(name = "tipo_pesaje_id") val tipoPesajeId: String,
     @ColumnInfo(name = "peso_cent") val pesoCent: Long,
-    @ColumnInfo(name = "registrado_por") val registradoPor: String
+    @ColumnInfo(name = "registrado_por") val registradoPor: String,
+    @ColumnInfo(name = "estado_sincronizacion", defaultValue = "'pendiente'")
+    val estadoSincronizacion: String = "pendiente"
 ) {
     init {
         require(pesoCent > 0) { "El peso debe ser mayor que cero." }
