@@ -30,6 +30,10 @@ import com.ovium.app.data.local.AnimalEntity
 import com.ovium.app.data.local.OviumDatabase
 import com.ovium.app.data.local.PartoEntity
 import com.ovium.app.data.local.PesajeEntity
+import com.ovium.app.data.remote.ApiClient
+import java.io.IOException
+import kotlinx.coroutines.flow.first
+import retrofit2.HttpException
 import java.math.BigDecimal
 import kotlinx.coroutines.launch
 
@@ -53,10 +57,44 @@ fun InventarioScreen(onAnimal: (String) -> Unit, onVolver: () -> Unit) {
     val animales by consulta.collectAsStateWithLifecycle(initialValue = null)
     val scope = rememberCoroutineScope()
     var cargandoDemo by remember { mutableStateOf(false) }
+    var importando by remember { mutableStateOf(false) }
+    var resultadoImportacion by remember { mutableStateOf<String?>(null) }
 
     Column(Modifier.fillMaxSize().padding(24.dp)) {
         TextButton(onClick = onVolver) { Text("Volver") }
         Text("Inventario", style = MaterialTheme.typography.headlineMedium)
+
+        if (BuildConfig.DEBUG) {
+            Button(
+                enabled = !importando && !cargandoDemo,
+                onClick = {
+                    importando = true
+                    scope.launch {
+                        try {
+                            val total = importarAnimalesDePrueba(base)
+                            resultadoImportacion = if (total == 0) {
+                                "La API no devolvió animales para esta cuenta."
+                            } else {
+                                "Animales disponibles en la API: $total"
+                            }
+                        } catch (error: HttpException) {
+                            resultadoImportacion = if (error.code() == 401) {
+                                "La sesión en la API venció. Inicia sesión de nuevo."
+                            } else {
+                                "La API devolvió HTTP ${error.code()}."
+                            }
+                        } catch (_: IOException) {
+                            resultadoImportacion = "No se pudo conectar con la API."
+                        } finally {
+                            importando = false
+                        }
+                    }
+                }
+            ) {
+                Text(if (importando) "Consultando API…" else "Importar animales de la API (prueba)")
+            }
+            resultadoImportacion?.let { Text(it) }
+        }
 
         val registros = animales
         when {
@@ -65,7 +103,7 @@ fun InventarioScreen(onAnimal: (String) -> Unit, onVolver: () -> Unit) {
                 Text("Todavía no hay animales guardados en este dispositivo.")
                 if (BuildConfig.DEBUG) {
                     Button(
-                        enabled = !cargandoDemo,
+                        enabled = !cargandoDemo && !importando,
                         onClick = {
                             cargandoDemo = true
                             scope.launch {
@@ -113,10 +151,16 @@ fun FichaAnimalScreen(animalId: String, onVolver: () -> Unit) {
     val dao = base.localDao()
     val consultaAnimal = remember(dao, animalId) { dao.observarAnimal(animalId) }
     val consultaPartos = remember(dao, animalId) { dao.observarPartos(animalId) }
+    var mostrarRegistro by remember(animalId) { mutableStateOf(false) }
     val consultaPesajes = remember(dao, animalId) { dao.observarPesajes(animalId) }
     val animal by consultaAnimal.collectAsStateWithLifecycle(initialValue = null)
     val partos by consultaPartos.collectAsStateWithLifecycle(initialValue = null)
     val pesajes by consultaPesajes.collectAsStateWithLifecycle(initialValue = null)
+
+    val animalSeleccionado = animal
+    if (mostrarRegistro && animalSeleccionado != null) {
+        RegistroPesajeDialog(animalSeleccionado, onCerrar = { mostrarRegistro = false })
+    }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize().padding(24.dp),
@@ -148,7 +192,10 @@ fun FichaAnimalScreen(animalId: String, onVolver: () -> Unit) {
                 ficha.padreId?.let { Text("Padre: $it") }
             }
 
-            item { Text("Pesajes", style = MaterialTheme.typography.titleMedium) }
+            item {
+                Text("Pesajes", style = MaterialTheme.typography.titleMedium)
+                Button(onClick = { mostrarRegistro = true }) { Text("Registrar pesaje") }
+            }
             val historialPesajes = pesajes
             when {
                 historialPesajes == null -> item { Text("Cargando pesajes…") }
@@ -210,4 +257,27 @@ private suspend fun cargarDemo(base: OviumDatabase) = base.withTransaction {
             registradoPor = "demo"
         )
     )
+}
+
+private suspend fun importarAnimalesDePrueba(base: OviumDatabase): Int {
+    val api = ApiClient.service
+    val remotos = api.listarRanchos().flatMap { rancho ->
+        api.listarAnimales(rancho.id).map { animal ->
+            AnimalEntity(
+                id = animal.id,
+                ranchoId = rancho.id,
+                sexo = animal.sexo,
+                estado = animal.estado,
+                fechaNacimiento = animal.fechaNacimiento,
+                razaId = animal.razaId,
+                estadoSincronizacion = "sincronizado"
+            )
+        }
+    }
+    base.withTransaction {
+        val dao = base.localDao()
+        val locales = dao.observarAnimales().first().mapTo(mutableSetOf()) { it.id }
+        remotos.filter { locales.add(it.id) }.forEach { dao.guardarAnimal(it) }
+    }
+    return remotos.size
 }
