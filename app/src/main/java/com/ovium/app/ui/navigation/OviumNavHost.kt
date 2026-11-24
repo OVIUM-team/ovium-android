@@ -1,6 +1,8 @@
 package com.ovium.app.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import com.ovium.app.data.remote.ApiClient
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -11,7 +13,10 @@ import com.ovium.app.ui.home.HomeScreen
 fun OviumNavHost(
     navController: NavHostController = rememberNavController()
 ) {
-    NavHost(navController = navController, startDestination = "login") {
+    val destinoInicial = remember {
+        if (ApiClient.tokenGuardado() != null) Routes.INICIO else "login"
+    }
+    NavHost(navController = navController, startDestination = destinoInicial) {
         composable("login") {
             com.ovium.app.ui.login.LoginScreen(
                 onLoginSuccess = {

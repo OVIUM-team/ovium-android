@@ -74,9 +74,12 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
                         val respuesta = ApiClient.service.login(
                             LoginRequest(usuario.trim(), contrasena)
                         )
+                        val token = respuesta.body()?.accessToken
                         when {
-                            respuesta.isSuccessful && !respuesta.body()?.accessToken.isNullOrBlank() ->
+                            respuesta.isSuccessful && !token.isNullOrBlank() -> {
+                                ApiClient.guardarToken(token)
                                 onLoginSuccess()
+                            }
                             respuesta.code() == 401 ->
                                 error = "Usuario o contraseña incorrectos."
                             else ->
