@@ -10,6 +10,8 @@ import androidx.room.PrimaryKey
 import androidx.room.Query
 import androidx.room.RoomDatabase
 import androidx.room.Upsert
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import kotlinx.coroutines.flow.Flow
 
 @Entity(
@@ -62,6 +64,8 @@ data class PartoEntity(
     @ColumnInfo(name = "padre_id") val padreId: String? = null,
     val bloqueado: Boolean = false,
     val observaciones: String? = null,
+    @ColumnInfo(name = "crias_json") val criasJson: String? = null,
+    @ColumnInfo(name = "foto_jpeg") val fotoJpeg: ByteArray? = null,
     @ColumnInfo(name = "estado_sincronizacion", defaultValue = "'pendiente'")
     val estadoSincronizacion: String = "pendiente"
 )
@@ -81,7 +85,7 @@ data class PesajeEntity(
     @PrimaryKey val id: String,
     @ColumnInfo(name = "animal_id") val animalId: String,
     val fecha: String,
-    @ColumnInfo(name = "tipo_pesaje_id") val tipoPesajeId: String,
+    val tipo: String,
     @ColumnInfo(name = "peso_cent") val pesoCent: Long,
     @ColumnInfo(name = "registrado_por") val registradoPor: String,
     @ColumnInfo(name = "estado_sincronizacion", defaultValue = "'pendiente'")
@@ -121,9 +125,45 @@ interface OviumLocalDao {
 
 @Database(
     entities = [AnimalEntity::class, PartoEntity::class, PesajeEntity::class],
-    version = 1,
+    version = 2,
     exportSchema = true
 )
 abstract class OviumDatabase : RoomDatabase() {
     abstract fun localDao(): OviumLocalDao
+}
+
+internal val migracionPartos = object : Migration(1, 2) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        val usaColumnaAnterior = db.query("PRAGMA table_info(pesaje)").use { columnas ->
+            val nombre = columnas.getColumnIndexOrThrow("name")
+            generateSequence { if (columnas.moveToNext()) columnas.getString(nombre) else null }
+                .any { it == "tipo_pesaje_id" }
+        }
+        if (usaColumnaAnterior) {
+            db.execSQL("""
+                CREATE TABLE pesaje_nuevo (
+                    id TEXT NOT NULL PRIMARY KEY,
+                    animal_id TEXT NOT NULL,
+                    fecha TEXT NOT NULL,
+                    tipo TEXT NOT NULL,
+                    peso_cent INTEGER NOT NULL,
+                    registrado_por TEXT NOT NULL,
+                    estado_sincronizacion TEXT NOT NULL DEFAULT 'pendiente',
+                    FOREIGN KEY(animal_id) REFERENCES animal(id) ON UPDATE NO ACTION ON DELETE NO ACTION
+                )
+            """.trimIndent())
+            db.execSQL("""
+                INSERT INTO pesaje_nuevo
+                SELECT id, animal_id, fecha,
+                    CASE tipo_pesaje_id WHEN 'demo-evaluacion' THEN 'evaluacion' ELSE tipo_pesaje_id END,
+                    peso_cent, registrado_por, estado_sincronizacion
+                FROM pesaje
+            """.trimIndent())
+            db.execSQL("DROP TABLE pesaje")
+            db.execSQL("ALTER TABLE pesaje_nuevo RENAME TO pesaje")
+            db.execSQL("CREATE INDEX index_pesaje_animal_id_fecha ON pesaje(animal_id, fecha)")
+        }
+        db.execSQL("ALTER TABLE parto ADD COLUMN crias_json TEXT")
+        db.execSQL("ALTER TABLE parto ADD COLUMN foto_jpeg BLOB")
+    }
 }
