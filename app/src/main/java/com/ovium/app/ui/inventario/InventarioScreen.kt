@@ -29,6 +29,7 @@ import com.ovium.app.BuildConfig
 import com.ovium.app.data.local.AnimalEntity
 import com.ovium.app.data.local.OviumDatabase
 import com.ovium.app.data.local.PartoEntity
+import com.ovium.app.data.local.migracionPartos
 import com.ovium.app.data.local.PesajeEntity
 import java.math.BigDecimal
 import kotlinx.coroutines.launch
@@ -42,7 +43,7 @@ private object BaseInventario {
             contexto.applicationContext,
             OviumDatabase::class.java,
             "ovium.db"
-        ).build().also { instancia = it }
+        ).addMigrations(migracionPartos).build().also { instancia = it }
 }
 
 @Composable
@@ -117,6 +118,16 @@ fun FichaAnimalScreen(animalId: String, onVolver: () -> Unit) {
     val animal by consultaAnimal.collectAsStateWithLifecycle(initialValue = null)
     val partos by consultaPartos.collectAsStateWithLifecycle(initialValue = null)
     val pesajes by consultaPesajes.collectAsStateWithLifecycle(initialValue = null)
+    var registrarParto by remember { mutableStateOf(false) }
+    var editarParto by remember { mutableStateOf<PartoEntity?>(null) }
+    val madre = animal
+    if (madre != null && (registrarParto || editarParto != null)) {
+        RegistroPartoDialog(madre, editarParto, dao::guardarParto) {
+            registrarParto = false
+            editarParto = null
+        }
+    }
+
 
     LazyColumn(
         modifier = Modifier.fillMaxSize().padding(24.dp),
@@ -159,16 +170,18 @@ fun FichaAnimalScreen(animalId: String, onVolver: () -> Unit) {
                 }
             }
 
-            item { Text("Partos", style = MaterialTheme.typography.titleMedium) }
+            item {
+                Text("Partos", style = MaterialTheme.typography.titleMedium)
+                if (ficha.sexo.equals("hembra", ignoreCase = true) && ficha.estado == "activo") {
+                    Button(onClick = { registrarParto = true }) { Text("Registrar parto") }
+                }
+            }
             val historialPartos = partos
             when {
                 historialPartos == null -> item { Text("Cargando partos…") }
                 historialPartos.isEmpty() -> item { Text("Sin partos registrados.") }
                 else -> items(historialPartos, key = { "parto-${it.id}" }) { parto ->
-                    Column {
-                        Text(parto.fecha)
-                        parto.observaciones?.let { Text(it) }
-                    }
+                    ResumenParto(parto, onEditar = { editarParto = parto })
                 }
             }
         }
@@ -205,7 +218,7 @@ private suspend fun cargarDemo(base: OviumDatabase) = base.withTransaction {
             id = "demo-pesaje-001",
             animalId = animalId,
             fecha = "2026-11-23",
-            tipoPesajeId = "demo-evaluacion",
+            tipo = "evaluacion",
             pesoCent = 3250L,
             registradoPor = "demo"
         )
