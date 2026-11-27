@@ -38,7 +38,7 @@ class OviumDatabaseTest {
                 id = "pesaje-prueba",
                 animalId = animal.id,
                 fecha = "2026-11-23",
-                tipoPesajeId = "evaluacion",
+                tipo = "evaluacion",
                 pesoCent = 3250L,
                 registradoPor = "usuario-prueba"
             )

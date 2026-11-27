@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "cc65ae2fb5e99fcc7e3038431e2fbd8b",
+    "identityHash": "10aeb02871ed34965f93325c6ee372b2",
     "entities": [
       {
         "tableName": "animal",
@@ -233,7 +233,7 @@
       },
       {
         "tableName": "pesaje",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `animal_id` TEXT NOT NULL, `fecha` TEXT NOT NULL, `tipo_pesaje_id` TEXT NOT NULL, `peso_cent` INTEGER NOT NULL, `registrado_por` TEXT NOT NULL, `estado_sincronizacion` TEXT NOT NULL DEFAULT 'pendiente', PRIMARY KEY(`id`), FOREIGN KEY(`animal_id`) REFERENCES `animal`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `animal_id` TEXT NOT NULL, `fecha` TEXT NOT NULL, `tipo` TEXT NOT NULL, `peso_cent` INTEGER NOT NULL, `registrado_por` TEXT NOT NULL, `estado_sincronizacion` TEXT NOT NULL DEFAULT 'pendiente', PRIMARY KEY(`id`), FOREIGN KEY(`animal_id`) REFERENCES `animal`(`id`) ON UPDATE NO ACTION ON DELETE NO ACTION )",
         "fields": [
           {
             "fieldPath": "id",
@@ -254,8 +254,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "tipoPesajeId",
-            "columnName": "tipo_pesaje_id",
+            "fieldPath": "tipo",
+            "columnName": "tipo",
             "affinity": "TEXT",
             "notNull": true
           },
@@ -314,7 +314,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'cc65ae2fb5e99fcc7e3038431e2fbd8b')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '10aeb02871ed34965f93325c6ee372b2')"
     ]
   }
 }
