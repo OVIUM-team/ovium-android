@@ -16,7 +16,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ovium.app.ui.components.OviumButton
 
 @Composable
-fun HomeScreen(viewModel: HomeViewModel = viewModel()) {
+fun HomeScreen(onInventario: () -> Unit, viewModel: HomeViewModel = viewModel()) {
     val estado by viewModel.estado.collectAsStateWithLifecycle()
 
     Column(
@@ -41,5 +41,6 @@ fun HomeScreen(viewModel: HomeViewModel = viewModel()) {
             onClick = viewModel::probarConexion,
             enabled = estado != EstadoConexion.Probando
         )
+        OviumButton(texto = "Ver inventario", onClick = onInventario)
     }
 }
